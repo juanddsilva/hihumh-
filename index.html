@@ -313,36 +313,309 @@
             color: #2d3436;
         }
 
+        @media (max-width: 1200px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .selector-row {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 15px;
+            }
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
+            }
+            
+            header {
+                padding: 20px 15px;
+                margin-bottom: 20px;
             }
             
             h1 {
                 font-size: 2em;
             }
             
+            .subtitle {
+                font-size: 1em;
+            }
+            
             .tabs {
                 flex-direction: column;
                 align-items: center;
+                gap: 8px;
             }
             
             .tab {
                 width: 100%;
                 max-width: 300px;
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+            
+            .content {
+                padding: 20px 15px;
             }
             
             .selector-row {
                 grid-template-columns: 1fr;
+                gap: 15px;
             }
             
             .calendar {
                 gap: 5px;
+                font-size: 14px;
+            }
+            
+            .calendar-day {
+                min-height: 35px;
+                font-size: 12px;
+            }
+            
+            .calendar-header {
+                padding: 8px 5px;
+                font-size: 12px;
             }
             
             .modal-content {
                 margin: 10% auto;
                 width: 95%;
+                padding: 20px;
+            }
+            
+            .month-nav {
+                margin-bottom: 15px;
+            }
+            
+            .month-nav button {
+                padding: 8px 12px;
+                font-size: 16px;
+            }
+            
+            .month-title {
+                font-size: 1.2em;
+            }
+            
+            .btn {
+                padding: 12px 25px;
+                font-size: 15px;
+                width: 100%;
+            }
+            
+            .result {
+                padding: 20px;
+                margin-top: 15px;
+            }
+            
+            .result h3 {
+                font-size: 1.1em;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 10px;
+            }
+            
+            .stat-card {
+                padding: 15px;
+            }
+            
+            .stat-number {
+                font-size: 1.5em;
+            }
+            
+            .stat-label {
+                font-size: 0.8em;
+            }
+            
+            .memory-card {
+                padding: 15px;
+                margin-bottom: 10px;
+            }
+            
+            .memory-card h4 {
+                font-size: 1.1em;
+            }
+            
+            .memory-card p {
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 8px;
+            }
+            
+            header {
+                padding: 15px 10px;
+                margin-bottom: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .subtitle {
+                font-size: 0.9em;
+            }
+            
+            .content {
+                padding: 15px 10px;
+            }
+            
+            .tab {
+                padding: 10px 15px;
+                font-size: 13px;
+            }
+            
+            select, input, textarea {
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            
+            .calendar {
+                gap: 3px;
+            }
+            
+            .calendar-day {
+                min-height: 30px;
+                font-size: 11px;
+            }
+            
+            .calendar-header {
+                padding: 6px 3px;
+                font-size: 11px;
+            }
+            
+            .modal-content {
+                margin: 5% auto;
+                width: 98%;
+                padding: 15px;
+            }
+            
+            .month-nav button {
+                padding: 6px 10px;
+                font-size: 14px;
+            }
+            
+            .month-title {
+                font-size: 1.1em;
+            }
+            
+            .result {
+                padding: 15px;
+            }
+            
+            .result h3 {
+                font-size: 1em;
+            }
+            
+            .result p {
+                font-size: 0.9em;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            
+            .stat-card {
+                padding: 12px;
+            }
+            
+            .stat-number {
+                font-size: 1.3em;
+            }
+            
+            .close {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            h1 {
+                font-size: 1.6em;
+            }
+            
+            .subtitle {
+                font-size: 0.8em;
+            }
+            
+            .calendar-day {
+                min-height: 25px;
+                font-size: 10px;
+            }
+            
+            .calendar-header {
+                font-size: 10px;
+                padding: 5px 2px;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+                font-size: 13px;
+            }
+            
+            .modal-content {
+                padding: 12px;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Melhorias de touch e usabilidade mobile */
+        @media (hover: none) and (pointer: coarse) {
+            .calendar-day {
+                min-height: 40px;
+            }
+            
+            .btn {
+                min-height: 44px;
+            }
+            
+            .tab {
+                min-height: 44px;
+            }
+            
+            select, input, textarea {
+                min-height: 44px;
+            }
+        }
+
+        /* Orientação landscape em dispositivos pequenos */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .tabs {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 5px;
+            }
+            
+            .tab {
+                width: auto;
+                min-width: 150px;
+                padding: 8px 15px;
+            }
+            
+            .calendar {
+                max-width: 100%;
+                overflow-x: auto;
+            }
+            
+            .modal-content {
+                margin: 2% auto;
+                max-height: 90vh;
+                overflow-y: auto;
             }
         }
 
