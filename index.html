@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Interativo dos Momentos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #2d3436;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #6c5ce7;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .subtitle {
+            color: #636e72;
+            font-size: 1.1em;
+            font-weight: 300;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            color: #636e72;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            background: #6c5ce7;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.3);
+        }
+
+        .tab:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .content {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2d3436;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            background: linear-gradient(45deg, #ffeaa7, #fab1a0);
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(255, 234, 167, 0.3);
+        }
+
+        .result h3 {
+            color: #2d3436;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .result p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .calendar-header {
+            text-align: center;
+            font-weight: 600;
+            padding: 10px;
+            background: #6c5ce7;
+            color: white;
+            border-radius: 10px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            border-color: #6c5ce7;
+            transform: scale(1.05);
+        }
+
+        .calendar-day.has-memory {
+            background: linear-gradient(45deg, #fd79a8, #fdcb6e);
+            color: white;
+            border-color: #fd79a8;
+        }
+
+        .calendar-day.has-memory::after {
+            content: '✨';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #6c5ce7;
+        }
+
+        .memory-card {
+            background: linear-gradient(45deg, #a8e6cf, #88d8c0);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(168, 230, 207, 0.3);
+        }
+
+        .memory-card h4 {
+            color: #2d3436;
+            margin-bottom: 10px;
+        }
+
+        .memory-card p {
+            color: #636e72;
+            line-height: 1.5;
+        }
+
+        .selector-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .month-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .month-nav button {
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .month-nav button:hover {
+            background: #5a4fcf;
+            transform: scale(1.1);
+        }
+
+        .month-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #2d3436;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tab {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .selector-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .calendar {
+                gap: 5px;
+            }
+            
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #636e72;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #6c5ce7;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(116, 185, 255, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Mapa Interativo dos Momentos</h1>
+            <p class="subtitle">Crie, planeje e registre momentos especiais</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="openTab(event, 'gerador')">✨ Gerador de Ideias</button>
+            <button class="tab" onclick="openTab(event, 'planner')">📅 Planner Visual</button>
+            <button class="tab" onclick="openTab(event, 'tracker')">📝 Tracker de Memórias</button>
+        </div>
+
+        <!-- Gerador de Ideias -->
+        <div id="gerador" class="content active">
+            <h2>Gerador de Ideias de Momentos</h2>
+            <div class="selector-row">
+                <div class="form-group">
+                    <label for="ocasiao">Ocasião:</label>
+                    <select id="ocasiao">
+                        <option value="romance">Romance</option>
+                        <option value="familia">Família</option>
+                        <option value="amizade">Amizade</option>
+                        <option value="reconciliacao">Reconciliação</option>
+                        <option value="dia-comum">Dia Comum</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tempo">Tempo disponível:</label>
+                    <select id="tempo">
+                        <option value="5min">5 minutos</option>
+                        <option value="30min">30 minutos</option>
+                        <option value="1h+">1 hora ou mais</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="orcamento">Orçamento:</label>
+                    <select id="orcamento">
+                        <option value="0">R$ 0</option>
+                        <option value="50">Até R$ 50</option>
+                        <option value="livre">Livre</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn" onclick="gerarMomento()">Gerar Momento</button>
+            <div id="resultado-gerador"></div>
+        </div>
+
+        <!-- Planner Visual -->
+        <div id="planner" class="content">
+            <h2>Planner Visual de Memórias</h2>
+            <div class="month-nav">
+                <button onclick="navegarMes(-1)">‹</button>
+                <div class="month-title" id="month-title"></div>
+                <button onclick="navegarMes(1)">›</button>
+            </div>
+            <div class="calendar" id="calendar"></div>
+        </div>
+
+        <!-- Tracker de Memórias -->
+        <div id="tracker" class="content">
+            <h2>Tracker de Memórias</h2>
+            <div class="form-group">
+                <label for="momento-realizado">Qual momento você realizou?</label>
+                <input type="text" id="momento-realizado" placeholder="Ex: Jantar romântico em casa">
+            </div>
+            <div class="form-group">
+                <label for="como-foi">Como foi?</label>
+                <textarea id="como-foi" placeholder="Descreva como foi a experiência..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="reacao">Reação da outra pessoa:</label>
+                <textarea id="reacao" placeholder="Como a pessoa reagiu?"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="repetiria">Repetiria?</label>
+                <select id="repetiria">
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                </select>
+            </div>
+            <button class="btn" onclick="salvarMemoria()">Salvar Memória</button>
+            <div id="resultado-tracker"></div>
+            
+            <div class="stats" id="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-memorias">0</div>
+                    <div class="stat-label">Memórias</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="repetiria-sim">0</div>
+                    <div class="stat-label">Repetiria</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar memória no calendário -->
+    <div id="memory-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal()">&times;</span>
+            <h3>Adicionar Memória</h3>
+            <div class="form-group">
+                <label for="nome-momento">Nome do Momento:</label>
+                <input type="text" id="nome-momento" placeholder="Ex: Almoço especial">
+            </div>
+            <div class="form-group">
+                <label for="observacao">Observação:</label>
+                <textarea id="observacao" placeholder="Detalhes sobre o momento..."></textarea>
+            </div>
+            <button class="btn" onclick="salvarMemoriaCalendario()">Salvar</button>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let selectedDay = null;
+        let memorias = JSON.parse(localStorage.getItem('memorias')) || [];
+        let memoriasCalendario = JSON.parse(localStorage.getItem('memoriasCalendario')) || {};
+
+        // Dados para o gerador de ideias
+        const ideias = {
+            romance: {
+                '5min': {
+                    '0': { sugestao: 'Escreva um bilhete de amor e deixe no travesseiro', gesto: 'Prepare uma xícara de chá', frase: 'Você é o melhor parte do meu dia ❤️' },
+                    '50': { sugestao: 'Compre flores no caminho de casa', gesto: 'Faça uma playlist especial', frase: 'Pensei em você hoje e sorri' },
+                    'livre': { sugestao: 'Reserve um jantar romântico', gesto: 'Escolha um vinho especial', frase: 'Que tal celebrarmos nosso amor hoje?' }
+                },
+                '30min': {
+                    '0': { sugestao: 'Prepare um banho relaxante com velas', gesto: 'Massageie os ombros dele/dela', frase: 'Você merece ser cuidado(a) assim' },
+                    '50': { sugestao: 'Cozinhem uma receita nova juntos', gesto: 'Coloque música romântica', frase: 'Cozinhar com você é minha terapia' },
+                    'livre': { sugestao: 'Façam uma sessão de fotos caseira', gesto: 'Improvisem um photoshoot', frase: 'Quero guardar este momento para sempre' }
+                },
+                '1h+': {
+                    '0': { sugestao: 'Assistam ao pôr do sol juntos', gesto: 'Levem um cobertor', frase: 'Cada pôr do sol é mais bonito ao seu lado' },
+                    '50': { sugestao: 'Visitem um local que tem significado especial', gesto: 'Comprem algo simbólico', frase: 'Este lugar sempre me lembra de nós' },
+                    'livre': { sugestao: 'Planejem uma escapada romântica', gesto: 'Façam as malas juntos', frase: 'Que tal fugirmos do mundo por um tempo?' }
+                }
+            },
+            familia: {
+                '5min': {
+                    '0': { sugestao: 'Ligue para alguém que você não fala há tempo', gesto: 'Envie uma foto antiga', frase: 'Estava pensando em você e nas nossas memórias' },
+                    '50': { sugestao: 'Compre um doce favorito de alguém da família', gesto: 'Entregue pessoalmente', frase: 'Lembrei que você ama isso!' },
+                    'livre': { sugestao: 'Organize uma videochamada familiar', gesto: 'Prepare um lanche especial', frase: 'Que tal juntarmos a família virtualmente?' }
+                },
+                '30min': {
+                    '0': { sugestao: 'Cozinhem uma receita da vovó juntos', gesto: 'Contem histórias durante o preparo', frase: 'Vamos manter as tradições vivas' },
+                    '50': { sugestao: 'Façam um álbum de fotos digital', gesto: 'Organizem as fotos por momentos especiais', frase: 'Que tal preservarmos essas memórias?' },
+                    'livre': { sugestao: 'Planejem uma reunião familiar', gesto: 'Organizem jogos e atividades', frase: 'Família é tudo na vida' }
+                },
+                '1h+': {
+                    '0': { sugestao: 'Organizem um piquenique no parque', gesto: 'Cada um leva algo caseiro', frase: 'Os melhores momentos são os mais simples' },
+                    '50': { sugestao: 'Visitem um museu ou exposição', gesto: 'Tirem fotos educativas', frase: 'Aprender juntos nos une mais' },
+                    'livre': { sugestao: 'Façam uma viagem em família', gesto: 'Planejem roteiros juntos', frase: 'Vamos criar memórias inesquecíveis' }
+                }
+            },
+            amizade: {
+                '5min': {
+                    '0': { sugestao: 'Envie uma mensagem de voz carinhosa', gesto: 'Conte uma piada interna', frase: 'Você é um dos meus tesouros mais preciosos' },
+                    '50': { sugestao: 'Compre um café especial para dividir', gesto: 'Surpreenda no trabalho/faculdade', frase: 'Pensei em você e trouxe isso!' },
+                    'livre': { sugestao: 'Marque um encontro surpresa', gesto: 'Escolha um lugar especial', frase: 'Que tal nos vermos hoje?' }
+                },
+                '30min': {
+                    '0': { sugestao: 'Façam uma caminhada no parque', gesto: 'Conversem sobre a vida', frase: 'Preciso do seu ouvido amigo' },
+                    '50': { sugestao: 'Assistam a um filme que ambos amam', gesto: 'Preparem pipoca especial', frase: 'Cinema em casa é sempre melhor com você' },
+                    'livre': { sugestao: 'Experimentem um hobby novo juntos', gesto: 'Pesquisem tutoriais online', frase: 'Vamos aprender algo novo juntos?' }
+                },
+                '1h+': {
+                    '0': { sugestao: 'Organizem um game night', gesto: 'Cada um leva um jogo', frase: 'Que a diversão comece!' },
+                    '50': { sugestao: 'Visitem um local que nunca foram', gesto: 'Documentem a aventura', frase: 'Vamos explorar o mundo juntos' },
+                    'livre': { sugestao: 'Planejem uma viagem de fim de semana', gesto: 'Pesquisem destinos incríveis', frase: 'Precisamos dessa aventura' }
+                }
+            },
+            reconciliacao: {
+                '5min': {
+                    '0': { sugestao: 'Escreva uma carta de desculpas sincera', gesto: 'Entregue pessoalmente', frase: 'Sinto muito, você é importante para mim' },
+                    '50': { sugestao: 'Compre algo que a pessoa gosta', gesto: 'Inclua um bilhete explicativo', frase: 'Espero que possamos conversar' },
+                    'livre': { sugestao: 'Convide para um encontro neutro', gesto: 'Escolha um local confortável', frase: 'Podemos conversar? Sinto sua falta' }
+                },
+                '30min': {
+                    '0': { sugestao: 'Preparem uma refeição juntos', gesto: 'Conversem durante o preparo', frase: 'Cozinhar juntos sempre nos aproxima' },
+                    '50': { sugestao: 'Visitem um lugar que tem memórias boas', gesto: 'Relembrem momentos especiais', frase: 'Lembra quando viemos aqui?' },
+                    'livre': { sugestao: 'Façam uma atividade que ambos gostam', gesto: 'Foquem no que os une', frase: 'Vamos nos reconectar' }
+                },
+                '1h+': {
+                    '0': { sugestao: 'Tenham uma conversa honesta e profunda', gesto: 'Escolham um ambiente tranquilo', frase: 'Precisamos conversar sobre nós' },
+                    '50': { sugestao: 'Participem de uma atividade significativa', gesto: 'Trabalhem juntos em algo', frase: 'Que tal recomeçarmos?' },
+                    'livre': { sugestao: 'Planejem um futuro juntos', gesto: 'Definam novos objetivos', frase: 'Vamos construir algo novo' }
+                }
+            },
+            'dia-comum': {
+                '5min': {
+                    '0': { sugestao: 'Faça um elogio sincero', gesto: 'Olhe nos olhos da pessoa', frase: 'Você fez meu dia melhor só por estar aqui' },
+                    '50': { sugestao: 'Compre um pequeno mimo', gesto: 'Entregue sem motivo especial', frase: 'Vi isso e pensei em você' },
+                    'livre': { sugestao: 'Sugira fazer algo espontâneo', gesto: 'Seja criativo na proposta', frase: 'E se fizéssemos algo diferente hoje?' }
+                },
+                '30min': {
+                    '0': { sugestao: 'Organizem um canto da casa juntos', gesto: 'Coloquem música animada', frase: 'Que tal deixarmos isso mais aconchegante?' },
+                    '50': { sugestao: 'Experimentem uma receita nova', gesto: 'Divirtam-se com o processo', frase: 'Vamos ser chefs por um dia' },
+                    'livre': { sugestao: 'Saiam para um passeio sem destino', gesto: 'Explorem o bairro', frase: 'Vamos descobrir lugares novos' }
+                },
+                '1h+': {
+                    '0': { sugestao: 'Tenham uma tarde de jogos', gesto: 'Criem um torneio caseiro', frase: 'Que comece a competição!' },
+                    '50': { sugestao: 'Visitem uma feira ou evento local', gesto: 'Experimentem coisas novas', frase: 'Vamos ver o que encontramos' },
+                    'livre': { sugestao: 'Planejem um projeto criativo', gesto: 'Usem a imaginação', frase: 'Vamos criar algo incrível juntos' }
+                }
+            }
+        };
+
+        // Função para trocar abas
+        function openTab(evt, tabName) {
+            const tabcontent = document.getElementsByClassName("content");
+            const tablinks = document.getElementsByClassName("tab");
+            
+            for (let i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            
+            for (let i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+            
+            if (tabName === 'planner') {
+                renderCalendar();
+            }
+            
+            if (tabName === 'tracker') {
+                atualizarStats();
+            }
+        }
+
+        // Gerador de ideias
+        function gerarMomento() {
+            const ocasiao = document.getElementById('ocasiao').value;
+            const tempo = document.getElementById('tempo').value;
+            const orcamento = document.getElementById('orcamento').value;
+            
+            const ideia = ideias[ocasiao][tempo][orcamento];
+            
+            const resultado = document.getElementById('resultado-gerador');
+            resultado.innerHTML = `
+                <div class="result">
+                    <h3>💡 Sua Ideia Personalizada</h3>
+                    <p><strong>Sugestão:</strong> ${ideia.sugestao}</p>
+                    <p><strong>Gesto complementar:</strong> ${ideia.gesto}</p>
+                    <p><strong>Frase pronta:</strong> "${ideia.frase}"</p>
+                </div>
+            `;
+        }
+
+        // Calendário
+        function renderCalendar() {
+            const calendar = document.getElementById('calendar');
+            const monthTitle = document.getElementById('month-title');
+            
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                               'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            
+            monthTitle.textContent = `${monthNames[month]} ${year}`;
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            calendar.innerHTML = '';
+            
+            // Cabeçalhos dos dias
+            const dayHeaders = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-header';
+                header.textContent = day;
+                calendar.appendChild(header);
+            });
+            
+            // Dias vazios no início
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                calendar.appendChild(emptyDay);
+            }
+            
+            // Dias do mês
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+                
+                const dateKey = `${year}-${month}-${day}`;
+                
+                if (memoriasCalendario[dateKey]) {
+                    dayElement.classList.add('has-memory');
+                    dayElement.title = memoriasCalendario[dateKey].nome;
+                }
+                
+                dayElement.addEventListener('click', () => {
+                    selectedDay = { year, month, day };
+                    document.getElementById('memory-modal').style.display = 'block';
+                    
+                    // Preencher dados se já existir memória
+                    if (memoriasCalendario[dateKey]) {
+                        document.getElementById('nome-momento').value = memoriasCalendario[dateKey].nome;
+                        document.getElementById('observacao').value = memoriasCalendario[dateKey].observacao;
+                    } else {
+                        document.getElementById('nome-momento').value = '';
+                        document.getElementById('observacao').value = '';
+                    }
+                });
+                
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        function navegarMes(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            renderCalendar();
+        }
+
+        function fecharModal() {
+            document.getElementById('memory-modal').style.display = 'none';
+        }
+
+        function salvarMemoriaCalendario() {
+            const nome = document.getElementById('nome-momento').value;
+            const observacao = document.getElementById('observacao').value;
+            
+            if (!nome.trim()) {
+                alert('Por favor, digite um nome para o momento.');
+                return;
+            }
+            
+            const dateKey = `${selectedDay.year}-${selectedDay.month}-${selectedDay.day}`;
+            
+            memoriasCalendario[dateKey] = {
+                nome: nome,
+                observacao: observacao,
+                data: new Date(selectedDay.year, selectedDay.month, selectedDay.day)
+            };
+            
+            localStorage.setItem('memoriasCalendario', JSON.stringify(memoriasCalendario));
+            
+            fecharModal();
+            renderCalendar();
+        }
+
+        // Tracker de memórias
+        function salvarMemoria() {
+            const momento = document.getElementById('momento-realizado').value;
+            const comoFoi = document.getElementById('como-foi').value;
+            const reacao = document.getElementById('reacao').value;
+            const repetiria = document.getElementById('repetiria').value;
+            
+            if (!momento.trim() || !comoFoi.trim()) {
+                alert('Por favor, preencha pelo menos o momento realizado e como foi.');
+                return;
+            }
+            
+            const memoria = {
+                momento: momento,
+                comoFoi: comoFoi,
+                reacao: reacao,
+                repetiria: repetiria,
+                data: new Date().toLocaleDateString('pt-BR')
+            };
+            
+            memorias.push(memoria);
+            localStorage.setItem('memorias', JSON.stringify(memorias));
+            
+            // Limpar formulário
+            document.getElementById('momento-realizado').value = '';
+            document.getElementById('como-foi').value = '';
+            document.getElementById('reacao').value = '';
+            document.getElementById('repetiria').value = 'sim';
+            
+            // Mostrar resultado
+            const resultado = document.getElementById('resultado-tracker');
+            resultado.innerHTML = `
+                <div class="memory-card">
+                    <h4>✅ Memória Salva!</h4>
+                    <p><strong>Momento:</strong> ${memoria.momento}</p>
+                    <p><strong>Como foi:</strong> ${memoria.comoFoi}</p>
+                    <p><strong>Reação:</strong> ${memoria.reacao}</p>
+                    <p><strong>Repetiria:</strong> ${memoria.repetiria === 'sim' ? 'Sim' : 'Não'}</p>
+                    <p><strong>Data:</strong> ${memoria.data}</p>
+                </div>
+            `;
+            
+            atualizarStats();
+        }
+
+        function atualizarStats() {
+            const totalMemorias = memorias.length;
+            const repetiriasSim = memorias.filter(m => m.repetiria === 'sim').length;
+            
+            document.getElementById('total-memorias').textContent = totalMemorias;
+            document.getElementById('repetiria-sim').textContent = repetiriasSim;
+        }
+
+        // Fechar modal clicando fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('memory-modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Inicializar
+        window.onload = function() {
+            renderCalendar();
+            atualizarStats();
+        }
+    </script>
+</body>
+</html>
